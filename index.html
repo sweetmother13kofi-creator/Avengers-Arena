@@ -1,12 +1,251 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AVENGERS ARENA</title><style>
-:root{--gold:#ffc642}*{box-sizing:border-box}body{margin:0;font-family:Arial;background:radial-gradient(circle at top,#20385f,#081326 55%,#050a14);color:white;min-height:100vh}header{text-align:center;padding:25px 12px;border-bottom:1px solid #334766}.logo{font-size:clamp(27px,7vw,42px);font-weight:900;color:var(--gold)}.sub{letter-spacing:4px;font-size:12px;color:#d8e2f2}main{max-width:700px;margin:25px auto;padding:0 14px}.card{background:#111f38;border:1px solid #334766;border-radius:18px;padding:20px;margin-bottom:16px}h1{font-size:24px}p{color:#b9c4d7;line-height:1.5}.tag{display:inline-block;background:#263b5b;color:var(--gold);padding:6px 10px;border-radius:30px;font-size:12px;font-weight:bold}input{width:100%;padding:14px;background:#071225;color:white;border:1px solid #526783;border-radius:10px;margin:8px 0 14px}button{padding:13px;border:0;border-radius:10px;background:var(--gold);color:#172033;font-weight:bold;cursor:pointer}.secondary,.answer{background:#263b5b;color:white;border:1px solid #526783}.actions{display:flex;gap:10px;flex-wrap:wrap}.question{font-size:20px;font-weight:bold;margin:18px 0}.answer{display:block;width:100%;text-align:left;margin:8px 0}.hidden{display:none}.small{font-size:12px;color:#9fb0c9}.score{font-size:36px;color:var(--gold);font-weight:bold}footer{text-align:center;padding:20px;color:#8292aa;font-size:12px}</style></head><body><header><div class="logo">🦸 AVENGERS ARENA</div><div class="sub">SCIENCE ONE LEGACY</div></header><main>
-<section id="home" class="card"><span class="tag">PLAY • COMPETE • WIN</span><h1>Welcome to the Arena!</h1><p>Challenge your classmates, test your knowledge and climb the leaderboard.</p><label>Your player name</label><input id="player" maxlength="24" placeholder="Enter your name"><div class="actions"><button onclick="startGame()">Join demo game</button><button class="secondary" onclick="alert('Enter your name and join the demo quiz. Shared live games will be added in the next stage.')">How to play</button></div><p class="small">Preview mode: this quiz runs on this device only. Shared live games, leaderboards and rewards will be connected in the next setup step.</p></section>
-<section id="game" class="card hidden"><span class="tag">DEMO CHALLENGE #001</span><p id="progress" class="small"></p><div id="question" class="question"></div><div id="answers"></div><p id="feedback"></p></section>
-<section id="result" class="card hidden"><span class="tag">YOUR RESULT</span><h1>Challenge completed!</h1><div class="score" id="score"></div><p id="resultText"></p><button onclick="location.reload()">Play again</button></section></main><footer>AVENGERS ARENA • SCIENCE ONE LEGACY</footer>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AVENGERS ARENA</title>
+<style>
+:root{--gold:#ffc642;--panel:#111f38;--line:#334766}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#20385f,#081326 55%,#050a14);color:white;min-height:100vh}
+header{text-align:center;padding:25px 12px;border-bottom:1px solid var(--line)}
+.logo{font-size:clamp(27px,7vw,42px);font-weight:900;color:var(--gold)}
+.sub{letter-spacing:4px;font-size:12px;color:#d8e2f2}
+main{max-width:760px;margin:24px auto;padding:0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+h1{font-size:24px;margin-top:12px}
+p{color:#b9c4d7;line-height:1.5}
+.tag{display:inline-block;background:#263b5b;color:var(--gold);padding:6px 10px;border-radius:30px;font-size:12px;font-weight:bold}
+input{width:100%;padding:14px;background:#071225;color:white;border:1px solid #526783;border-radius:10px;margin:8px 0 14px}
+button{padding:13px;border:0;border-radius:10px;background:var(--gold);color:#172033;font-weight:bold;cursor:pointer;margin:4px 4px 4px 0}
+button.secondary,.answer{background:#263b5b;color:white;border:1px solid #526783}
+button:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.gameitem{border:1px solid #526783;border-radius:12px;padding:14px;margin:10px 0}
+.answer{display:block;width:100%;text-align:left;margin:8px 0}
+.small{font-size:12px;color:#9fb0c9}
+.status{padding:10px;border-radius:9px;background:#263b5b;color:#fff;white-space:pre-wrap}
+.hidden{display:none}
+.score{font-size:30px;color:var(--gold);font-weight:bold}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:9px;border-bottom:1px solid #334766}
+footer{text-align:center;padding:20px;color:#8292aa;font-size:12px}
+</style>
+</head>
+<body>
+<header><div class="logo">🦸 AVENGERS ARENA</div><div class="sub">SCIENCE ONE LEGACY</div></header>
+<main>
+<section class="card" id="joinCard">
+ <span class="tag">PLAY • COMPETE • WIN</span>
+ <h1>Welcome to the Arena!</h1>
+ <p>Join your classmates, test your knowledge and climb the leaderboard.</p>
+ <label for="username">Choose a username</label>
+ <input id="username" maxlength="20" placeholder="Enter username (3–20 characters)" autocomplete="nickname">
+ <button id="joinBtn">Enter the Arena</button>
+ <p class="small">No email address is required. Use a username that you can remember on this device.</p>
+</section>
+<section class="card hidden" id="lobbyCard">
+ <span class="tag">ARENA LOBBY</span>
+ <h1 id="welcome"></h1>
+ <p>Choose a published game to join.</p>
+ <div id="games">Loading games…</div>
+ <button class="secondary" id="refreshGames">Refresh games</button>
+</section>
+<section class="card hidden" id="playCard">
+ <span class="tag" id="gameTag">CHALLENGE</span>
+ <h1 id="gameTitle"></h1>
+ <p id="questionProgress" class="small"></p>
+ <div id="questionText" class="score" style="font-size:21px"></div>
+ <div id="answers"></div>
+ <p id="answerFeedback"></p>
+ <button class="secondary" id="backLobby">Back to lobby</button>
+</section>
+<section class="card hidden" id="leaderCard">
+ <span class="tag">LEADERBOARD</span>
+ <h1>Game results</h1>
+ <div id="myScore" class="score"></div>
+ <div id="leaderboard"></div>
+ <button id="claimBtn">Claim a reward</button>
+ <button class="secondary" id="lobbyAgain">Back to lobby</button>
+</section>
+<section class="card hidden" id="claimCard">
+ <span class="tag">REWARD CLAIM</span>
+ <h1>Request your reward</h1>
+ <p>Only submit your contact or payment details if you have won. The organiser will review your claim before sending a reward.</p>
+ <label for="rewardType">Reward type</label>
+ <select id="rewardType" style="width:100%;padding:13px;border-radius:10px;margin:8px 0;background:#071225;color:white">
+  <option value="airtime">Airtime</option><option value="data">Data</option><option value="momo">Mobile Money</option>
+ </select>
+ <label for="contactDetails">Phone number / MoMo details</label>
+ <input id="contactDetails" maxlength="120" placeholder="Enter details for reward delivery">
+ <button id="sendClaim">Submit claim</button>
+ <button class="secondary" id="cancelClaim">Cancel</button>
+</section>
+<div class="card"><div id="status" class="status">Connect to the Arena to begin.</div></div>
+</main>
+<footer>AVENGERS ARENA • SCIENCE ONE LEGACY<br>AVENGERS! ONCE CLASSMATES, FOREVER BROTHERS!</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const qs=[{q:"Which planet is known as the Red Planet?",a:["Venus","Mars","Jupiter","Mercury"],c:1},{q:"What is the chemical symbol for water?",a:["CO₂","O₂","H₂O","NaCl"],c:2},{q:"How many sides does a hexagon have?",a:["5","6","7","8"],c:1},{q:"Which organ pumps blood around the human body?",a:["Lungs","Brain","Liver","Heart"],c:3},{q:"What is 12 × 8?",a:["86","92","96","108"],c:2}];let idx=0,score=0,locked=false;
-function startGame(){if(!document.getElementById('player').value.trim()){alert('Enter your name first.');return}document.getElementById('home').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render()}
-function render(){locked=false;document.getElementById('progress').textContent=`Question ${idx+1} of ${qs.length}`;document.getElementById('question').textContent=qs[idx].q;document.getElementById('feedback').textContent='';let box=document.getElementById('answers');box.innerHTML='';qs[idx].a.forEach((a,i)=>{let b=document.createElement('button');b.className='answer';b.textContent=String.fromCharCode(65+i)+'. '+a;b.onclick=()=>choose(i);box.appendChild(b)})}
-function choose(i){if(locked)return;locked=true;let ok=i===qs[idx].c;if(ok)score++;document.querySelectorAll('.answer').forEach(x=>x.disabled=true);document.getElementById('feedback').textContent=ok?'✅ Correct!':'❌ Correct answer: '+qs[idx].a[qs[idx].c];let n=document.createElement('button');n.textContent=idx===qs.length-1?'See my score':'Next question';n.onclick=()=>{idx++;if(idx<qs.length)render();else finish()};document.getElementById('answers').appendChild(n)}
-function finish(){document.getElementById('game').classList.add('hidden');document.getElementById('result').classList.remove('hidden');document.getElementById('score').textContent=score+' / '+qs.length;document.getElementById('resultText').textContent=document.getElementById('player').value+', thanks for playing! This demo score is not a prize result.'}
-</script></body></html>
+/* Add your own Supabase Project URL and Publishable key below. */
+const SUPABASE_URL = "https://fusgabljoemtysxeuinl.supabase.co/rest/v1/";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__JZc_qpL5DsWKJPVsFr_wA_L_GCzgQx";
+
+const $ = id => document.getElementById(id);
+const show = id => $(id).classList.remove("hidden");
+const hide = id => $(id).classList.add("hidden");
+function message(text){$("status").textContent=text;}
+let db=null, user=null, currentGame=null, questions=[], questionIndex=0, currentScore=0;
+
+function configured(){
+ return SUPABASE_URL.startsWith("https://") &&
+        SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_");
+}
+async function enterArena(){
+ const username=$("username").value.trim();
+ if(!/^[A-Za-z0-9_]{3,20}$/.test(username)){
+  message("Choose a username with 3–20 letters, numbers or underscores.");
+  return;
+ }
+ if(!configured()){
+  message("The website still needs your Supabase Project URL and Publishable key added to the code.");
+  return;
+ }
+ $("joinBtn").disabled=true;
+ try{
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  let {data:sessionData,error:sessionError}=await db.auth.getSession();
+  if(sessionError) throw sessionError;
+  if(!sessionData.session){
+   const {error}=await db.auth.signInAnonymously();
+   if(error) throw error;
+  }
+  const {data:userData,error:userError}=await db.auth.getUser();
+  if(userError) throw userError;
+  user=userData.user;
+  const {error:profileError}=await db.from("players").upsert(
+   {id:user.id,username},
+   {onConflict:"id"}
+  );
+  if(profileError) throw profileError;
+  $("welcome").textContent="Welcome, "+username+"!";
+  hide("joinCard");show("lobbyCard");
+  await loadGames();
+  message("You're in the Arena. Choose a game when one is available.");
+ }catch(e){message("Could not enter: "+(e.message||"Please check your connection and settings."));}
+ finally{$("joinBtn").disabled=false;}
+}
+async function loadGames(){
+ $("games").textContent="Loading games…";
+ const {data,error}=await db.from("games").select("id,title,description")
+  .eq("status","published").order("created_at",{ascending:false});
+ if(error){$("games").textContent="Could not load games: "+error.message;return;}
+ if(!data.length){$("games").textContent="No games have been published yet. Ask the organiser to publish the first challenge.";return;}
+ $("games").innerHTML="";
+ data.forEach(g=>{
+  const box=document.createElement("div");box.className="gameitem";
+  const title=document.createElement("strong");title.textContent=g.title;
+  const desc=document.createElement("p");desc.textContent=g.description||"Join this challenge.";
+  const btn=document.createElement("button");btn.textContent="Join game";
+  btn.onclick=()=>joinGame(g);
+  box.append(title,desc,btn);$("games").appendChild(box);
+ });
+}
+async function joinGame(game){
+ currentGame=game;
+ const {error}=await db.from("game_entries").upsert(
+  {game_id:game.id,player_id:user.id},{onConflict:"game_id,player_id",ignoreDuplicates:true}
+ );
+ if(error){message("Could not join game: "+error.message);return;}
+ const {data,error:qError}=await db.from("questions")
+  .select("id,question_text,options,question_number")
+  .eq("game_id",game.id).order("question_number");
+ if(qError){message("Could not load questions: "+qError.message);return;}
+ if(!data.length){message("This game has no questions yet.");return;}
+ questions=data;questionIndex=0;
+ const {data:scoreData}=await db.from("scores").select("score")
+  .eq("game_id",game.id).eq("player_id",user.id).maybeSingle();
+ currentScore=scoreData?.score||0;
+ $("gameTitle").textContent=game.title;hide("lobbyCard");hide("leaderCard");show("playCard");
+ renderQuestion();
+}
+function renderQuestion(){
+ const q=questions[questionIndex];
+ $("questionProgress").textContent=`Question ${questionIndex+1} of ${questions.length}`;
+ $("questionText").textContent=q.question_text;
+ $("answerFeedback").textContent="";
+ $("answers").innerHTML="";
+ let opts=q.options;
+ if(!Array.isArray(opts)){try{opts=JSON.parse(opts)}catch{opts=[]}}
+ opts.forEach((option,index)=>{
+  const b=document.createElement("button");b.className="answer";
+  b.textContent=String.fromCharCode(65+index)+". "+option;
+  b.onclick=()=>submitAnswer(q,index,b);
+  $("answers").appendChild(b);
+ });
+}
+async function submitAnswer(q,index,button){
+ [...$("answers").querySelectorAll("button")].forEach(b=>b.disabled=true);
+ button.disabled=true;
+ const {data,error}=await db.rpc("submit_answer",{
+  p_game_id:currentGame.id,p_question_id:q.id,p_selected_option:index
+ });
+ if(error){
+  $("answerFeedback").textContent=error.message;
+  [...$("answers").querySelectorAll("button")].forEach(b=>b.disabled=false);
+  return;
+ }
+ const result=data[0];
+ currentScore=result.total_score;
+ $("answerFeedback").textContent=result.is_correct?"Correct! +1 point":"Not quite. Keep going!";
+ const next=document.createElement("button");
+ next.textContent=questionIndex===questions.length-1?"See leaderboard":"Next question";
+ next.onclick=()=>{
+  questionIndex++;
+  if(questionIndex<questions.length)renderQuestion();
+  else finishGame();
+ };
+ $("answers").appendChild(next);
+}
+async function finishGame(){
+ hide("playCard");show("leaderCard");
+ $("myScore").textContent="Your score: "+currentScore;
+ await loadLeaderboard();
+ message("Challenge completed. Your score has been recorded.");
+}
+async function loadLeaderboard(){
+ const {data,error}=await db.from("scores")
+  .select("score, players(username)")
+  .eq("game_id",currentGame.id).order("score",{ascending:false}).limit(50);
+ if(error){$("leaderboard").textContent="Leaderboard error: "+error.message;return;}
+ const table=document.createElement("table");
+ const head=document.createElement("tr");head.innerHTML="<th>Player</th><th>Score</th>";table.appendChild(head);
+ (data||[]).forEach(row=>{
+  const tr=document.createElement("tr");
+  const name=document.createElement("td");name.textContent=row.players?.username||"Player";
+  const score=document.createElement("td");score.textContent=row.score;
+  tr.append(name,score);table.appendChild(tr);
+ });
+ $("leaderboard").replaceChildren(table);
+}
+async function sendClaim(){
+ const contact=$("contactDetails").value.trim();
+ if(!contact){message("Enter the phone number or payment details for your reward.");return;}
+ const {error}=await db.from("reward_claims").insert({
+  player_id:user.id,reward_type:$("rewardType").value,
+  contact_details:contact,status:"pending"
+ });
+ if(error){message("Claim not submitted: "+error.message);return;}
+ message("Your reward claim has been submitted for organiser approval.");
+ hide("claimCard");show("leaderCard");
+}
+$("joinBtn").addEventListener("click",enterArena);
+$("refreshGames").addEventListener("click",loadGames);
+$("backLobby").addEventListener("click",()=>{hide("playCard");show("lobbyCard");});
+$("lobbyAgain").addEventListener("click",()=>{hide("leaderCard");show("lobbyCard");loadGames();});
+$("claimBtn").addEventListener("click",()=>{hide("leaderCard");show("claimCard");});
+$("cancelClaim").addEventListener("click",()=>{hide("claimCard");show("leaderCard");});
+$("sendClaim").addEventListener("click",sendClaim);
+</script>
+</body>
+</html>
